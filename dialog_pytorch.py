@@ -310,7 +310,7 @@ class chatBot(object):
                 q = transfer_to_gpu(q)
 
             pred = self.model.predict(s, q)
-            preds += list(pred.data.numpy().tolist())
+            preds += list(pred.cpu().data.numpy().tolist())
         return preds
 
 
