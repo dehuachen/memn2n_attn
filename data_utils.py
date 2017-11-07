@@ -65,46 +65,6 @@ def tokenize(sent):
     return result
 
 
-# def parse_dialogs(lines,candid_dic):
-#     '''
-#         Parse dialogs provided in the babi tasks format
-#     '''
-#     data=[]
-#     context=[]
-#     u=None
-#     r=None
-#     for line in lines:
-#         line=str.lower(line.strip())
-#         if line:
-#             nid, line = line.split(' ', 1)
-#             nid = int(nid)
-#             if '\t' in line:
-#                 u, r = line.split('\t')
-#                 u = tokenize(u)
-#                 r = tokenize(r)
-#                 # temporal encoding, and utterance/response encoding
-#                 u.append('$u')
-#                 u.append('#'+str(nid))
-#                 r.append('$r')
-#                 r.append('#'+str(nid))
-#                 context.append(u)
-#                 context.append(r)
-#             else:
-#                 r=tokenize(line)
-#                 r.append('$r')
-#                 r.append('#'+str(nid))
-#                 context.append(r)
-#         else:
-#             context=[x for x in context[:-2] if x]
-#             u=u[:-2]
-#             r=r[:-2]
-#             key=' '.join(r)
-#             if key in candid_dic:
-#                 r=candid_dic[key]
-#                 data.append((context, u,  r))
-#             context=[]
-#     return data
-
 def parse_dialogs_per_response(lines,candid_dic):
     '''
         Parse dialogs provided in the babi tasks format
@@ -151,15 +111,6 @@ def get_dialogs(f,candid_dic):
     with open(f) as f:
         return parse_dialogs_per_response(f.readlines(),candid_dic)
 
-# def vectorize_candidates_sparse(candidates,word_idx):
-#     shape=(len(candidates),len(word_idx)+1)
-#     indices=[]
-#     values=[]
-#     for i,candidate in enumerate(candidates):
-#         for w in candidate:
-#             indices.append([i,word_idx[w]])
-#             values.append(1.0)
-#     return tf.SparseTensor(indices,values,shape)
 
 def vectorize_candidates(candidates,word_idx,sentence_size):
     # shape=(len(candidates),sentence_size)
