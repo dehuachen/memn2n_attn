@@ -61,6 +61,8 @@ parser.add_argument('-OOV', type=get_bool, default=False,
                     help='if True, use OOV test set')
 args = parser.parse_args()
 
+is_cuda = torch.cuda.is_available()
+
 print("Started Task:", args.task_id)
 
 
@@ -87,7 +89,7 @@ def load_checkpoit(model, optimizer, path_to_model):
 
 def transfer_to_gpu(tensor, dtype=torch.LongTensor):
     tensor_cuda = dtype(tensor.size()).cuda()
-    tensor_cuda = V(tensor_cuda)
+    tensor_cuda = Variable(tensor_cuda)
     tensor_cuda.data.copy_(tensor.data)
     return tensor_cuda
 
@@ -137,6 +139,9 @@ class chatBot(object):
         # self.candidates_vec=vectorize_candidates_sparse(candidates,self.word_idx)
         self.candidates_vec = vectorize_candidates(
             candidates, self.word_idx, self.candidate_sentence_size)
+
+        if is_cuda: self.candidates_vec = transfer_to_gpu(self.candidates_vec)
+
         self.model = MemN2NDialog(self.batch_size,
                                   self.vocab_size,
                                   self.n_cand,
@@ -146,6 +151,9 @@ class chatBot(object):
                                   hops=self.hops,
                                   max_grad_norm=self.max_grad_norm,
                                   task_id=task_id)
+
+        if is_cuda: self.model.cuda()
+
         print(self.model)
 
     def build_vocab(self, data, candidates):
@@ -239,6 +247,11 @@ class chatBot(object):
                 s = Variable(torch.from_numpy(np.stack(s)))
                 q = Variable(torch.from_numpy(np.stack(q)))
                 a = Variable(torch.from_numpy(np.stack(a)))
+
+                if is_cuda:
+                    s = transfer_to_gpu(s)
+                    q = transfer_to_gpu(q)
+                    a = transfer_to_gpu(a)
 
                 cost_t = self.model.batch_fit(s, q, a)
                 total_cost += cost_t.data[0]
