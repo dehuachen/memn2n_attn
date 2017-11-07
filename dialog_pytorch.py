@@ -305,6 +305,10 @@ class chatBot(object):
             s = Variable(torch.from_numpy(np.array(s)))
             q = Variable(torch.from_numpy(np.array(q)))
 
+            if is_cuda:
+                s = transfer_to_gpu(s)
+                q = transfer_to_gpu(q)
+
             pred = self.model.predict(s, q)
             preds += list(pred.data.numpy().tolist())
         return preds
